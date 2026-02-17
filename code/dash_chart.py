@@ -31,7 +31,8 @@ app.layout = html.Div(
     },
 
     children=[
-    html.H1(children='Soul Foods company data'),
+    html.H1(children='Soul Foods company data',
+            id="header"),
 
     html.Div(children='''
         This dashboard reveals Pink Morsel sales.
@@ -47,7 +48,7 @@ app.layout = html.Div(
                  {'label' : 'All Regions', "value" : "all"},
                 ],
                 value = 'all',
-                id='xaxis-type',
+                id='region-filter',
                 inline=True
             )
         ]),
@@ -61,7 +62,7 @@ app.layout = html.Div(
 
 @callback(
     Output('data-graph', 'figure'),
-    Input('xaxis-type', 'value'))
+    Input('region-filter', 'value'))
 def update_graph(selected_region):
     
     if selected_region == "all":
@@ -84,6 +85,13 @@ def update_graph(selected_region):
     fig.update_layout(margin={'l': 40, 'b': 40, 't': 50, 'r': 0}, hovermode='closest',  paper_bgcolor="#DED7DD",)
 
     return fig
+
+
+@callback(
+    Output('container-no-ctx', 'children'),
+    Input('region-filter', 'value'))
+def update(selected):
+    return f'selected: {selected}'
 
 if __name__ == '__main__':
     app.run(debug=True)
