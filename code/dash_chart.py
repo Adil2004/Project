@@ -2,7 +2,7 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 
-from dash import Dash, html, dcc
+from dash import Dash, dcc, html, Input, Output, callback
 import plotly.express as px
 import pandas as pd
 
@@ -23,18 +23,67 @@ fig = px.line(
     }
 )
 
-app.layout = html.Div(children=[
+app.layout = html.Div(
+    style={
+        "backgroundColor": "grey",
+        "fontFamily": "Arial, sans-serif",
+        "padding": "30px"
+    },
+
+    children=[
     html.H1(children='Soul Foods company data'),
 
     html.Div(children='''
         This dashboard reveals Pink Morsel sales.
     '''),
 
+    html.Div([
+            dcc.RadioItems(
+                options = [
+                {'label' : 'North', "value" : "north"}, 
+                 {'label' : 'East', "value" : "east"}, 
+                 {'label' : 'South', "value" : "south"},
+                 {'label' : 'West', "value" : "west"},
+                 {'label' : 'All Regions', "value" : "all"},
+                ],
+                value = 'all',
+                id='xaxis-type',
+                inline=True
+            )
+        ]),
+        
     dcc.Graph(
-        id='example-graph',
+        id='data-graph',
         figure=fig,
     )
 ])
+
+
+@callback(
+    Output('data-graph', 'figure'),
+    Input('xaxis-type', 'value'))
+def update_graph(selected_region):
+    
+    if selected_region == "all":
+        filtered_df = df
+    else:
+        filtered_df = df[df.region == selected_region]
+    
+    fig = px.line(
+        filtered_df,
+        x="date",
+        y="sales",
+        color='price',
+        title="Sales Before and After Price Increase (15 Jan 2021) in " + str(selected_region) + " region",
+        labels={
+            "date": "Date",
+            "sales": "Total Sales ($)"
+        }
+    )
+
+    fig.update_layout(margin={'l': 40, 'b': 40, 't': 50, 'r': 0}, hovermode='closest',  paper_bgcolor="#DED7DD",)
+
+    return fig
 
 if __name__ == '__main__':
     app.run(debug=True)
